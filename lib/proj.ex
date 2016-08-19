@@ -70,65 +70,6 @@ defmodule Proj do
   end
 
   @doc """
-  Transforms coordinates from one Proj CRS to another.
-
-  Coordinates are given in the order `{x, y, z}`, or for geographic coordinates,
-  `{longitude, latitude, z}`, where `z` is the altitude above the geoid of the
-  CRS.  `longitude` and `latitude` must be given in radians.  `Proj.to_rad/1`
-  may be helpful if you have coordinates in degrees.
-
-  Returns `{:ok, {x, y, z}}` on success, or `{:error, "reason"}` if the PROJ.4
-  library was unable to perform a transformation.  If geographic coordinates are
-  returned, they will be in the order `{longitude, latitude, z}`, and will be in
-  radians.
-  """
-  @spec transform({radians, radians, z} | {x, y, z}, t, t) :: {:ok, {x, y, z}} | {:error, term}
-  def transform({_, _, _}, _from_proj, _to_proj) do
-    raise "NIF not loaded"
-  end
-
-  @doc """
-  Returns the `def` string given to create the given Proj object, expanded to
-  its fullest form if possible.
-
-      iex> Proj.get_def(Proj.wgs84)
-      " +init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
-  """
-  @spec get_def(t) :: String.t
-  def get_def(_proj) do
-    raise "NIF not loaded"
-  end
-
-  @doc """
-  Returns a Proj object for the WGS84 geographic coordinate reference system.
-
-  WGS84 is the standard coordinate system used for GPS and is most likely what
-  you need when working with `{latitude, longitude}` coordinates.
-  """
-  @spec wgs84 :: t
-  def wgs84 do
-    raise "NIF not loaded"
-  end
-
-  @doc """
-  Turns a `{longitude_radians, latitude_radians, z}` tuple into
-  `{longitude_degrees, latitude_degrees, z}`.
-  """
-  @spec to_deg({radians, radians, z}) :: {degrees, degrees, z}
-  def to_deg({lon, lat, z}) do
-    {lon * @rad_deg, lat * @rad_deg, z}
-  end
-
-  @doc """
-  Turns a `{longitude_degrees, latitude_degrees, z}` tuple into
-  `{longitude_radians, latitude_radians, z}`.
-  """
-  @spec to_rad({degrees, degrees, z}) :: {radians, radians, z}
-  def to_rad({lon, lat, z}) do
-    {lon * @deg_rad, lat * @deg_rad, z}
-  end
-
-  @doc """
   Returns a Proj object for a given known PROJ.4 init file definition.
 
   Returns `{:ok, proj}` on success, or `{:error, "reason"}` if the definition is
@@ -158,6 +99,42 @@ defmodule Proj do
   @spec from_epsg(epsg) :: {:ok, t} | {:error, term}
   def from_epsg(name) do
     from_known_def("epsg", name)
+  end
+
+  @doc """
+  Turns a `{longitude_radians, latitude_radians, z}` tuple into
+  `{longitude_degrees, latitude_degrees, z}`.
+  """
+  @spec to_deg({radians, radians, z}) :: {degrees, degrees, z}
+  def to_deg({lon, lat, z}) do
+    {lon * @rad_deg, lat * @rad_deg, z}
+  end
+
+  @doc """
+  Turns a `{longitude_degrees, latitude_degrees, z}` tuple into
+  `{longitude_radians, latitude_radians, z}`.
+  """
+  @spec to_rad({degrees, degrees, z}) :: {radians, radians, z}
+  def to_rad({lon, lat, z}) do
+    {lon * @deg_rad, lat * @deg_rad, z}
+  end
+
+  @doc """
+  Transforms coordinates from one Proj CRS to another.
+
+  Coordinates are given in the order `{x, y, z}`, or for geographic coordinates,
+  `{longitude, latitude, z}`, where `z` is the altitude above the geoid of the
+  CRS.  `longitude` and `latitude` must be given in radians.  `Proj.to_rad/1`
+  may be helpful if you have coordinates in degrees.
+
+  Returns `{:ok, {x, y, z}}` on success, or `{:error, "reason"}` if the PROJ.4
+  library was unable to perform a transformation.  If geographic coordinates are
+  returned, they will be in the order `{longitude, latitude, z}`, and will be in
+  radians.
+  """
+  @spec transform({radians, radians, z} | {x, y, z}, t, t) :: {:ok, {x, y, z}} | {:error, term}
+  def transform({_, _, _}, _from_proj, _to_proj) do
+    raise "NIF not loaded"
   end
 
   @doc """
@@ -205,5 +182,28 @@ defmodule Proj do
       {:error, error} ->
         raise error
     end
+  end
+
+  @doc """
+  Returns a Proj object for the WGS84 geographic coordinate reference system.
+
+  WGS84 is the standard coordinate system used for GPS and is most likely what
+  you need when working with `{latitude, longitude}` coordinates.
+  """
+  @spec wgs84 :: t
+  def wgs84 do
+    raise "NIF not loaded"
+  end
+
+  @doc """
+  Returns the `def` string given to create the given Proj object, expanded to
+  its fullest form if possible.
+
+      iex> Proj.get_def(Proj.wgs84)
+      " +init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
+  """
+  @spec get_def(t) :: String.t
+  def get_def(_proj) do
+    raise "NIF not loaded"
   end
 end
