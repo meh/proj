@@ -28,7 +28,7 @@ defmodule Proj do
   @type easting :: number
   @type northing :: number
 
-  defimpl Inspect, for: Proj do
+  defimpl Inspect do
     def inspect(proj, _opts) do
       "#Proj<#{String.trim(Proj.get_def(proj))}>"
     end
