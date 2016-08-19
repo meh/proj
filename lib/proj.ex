@@ -14,6 +14,19 @@ defmodule Proj do
   @on_load :load
 
   defstruct [:pj]
+  @opaque t :: %Proj{pj: binary}
+
+  @type epsg :: number
+
+  @type x :: number
+  @type y :: number
+  @type z :: number
+
+  @type radians :: number
+  @type degrees :: number
+
+  @type easting :: number
+  @type northing :: number
 
   defimpl Inspect, for: Proj do
     def inspect(proj, _opts) do
@@ -51,6 +64,7 @@ defmodule Proj do
   http://spatialreference.org/ for your desired CRS and find the PROJ.4
   parameter list under the "Proj4" link on a CRS's page.
   """
+  @spec from_def(String.t) :: {:ok, t} | {:error, term}
   def from_def(_def) do
     raise "NIF not loaded"
   end
@@ -68,6 +82,7 @@ defmodule Proj do
   returned, they will be in the order `{longitude, latitude, z}`, and will be in
   radians.
   """
+  @spec transform({radians, radians, z} | {x, y, z}, t, t) :: {:ok, {x, y, z}} | {:error, term}
   def transform({_, _, _}, _from_proj, _to_proj) do
     raise "NIF not loaded"
   end
@@ -79,6 +94,7 @@ defmodule Proj do
       iex> Proj.get_def(Proj.wgs84)
       " +init=epsg:4326 +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0"
   """
+  @spec get_def(t) :: String.t
   def get_def(_proj) do
     raise "NIF not loaded"
   end
@@ -89,6 +105,7 @@ defmodule Proj do
   WGS84 is the standard coordinate system used for GPS and is most likely what
   you need when working with `{latitude, longitude}` coordinates.
   """
+  @spec wgs84 :: t
   def wgs84 do
     raise "NIF not loaded"
   end
@@ -97,6 +114,7 @@ defmodule Proj do
   Turns a `{longitude_radians, latitude_radians, z}` tuple into
   `{longitude_degrees, latitude_degrees, z}`.
   """
+  @spec to_deg({radians, radians, z}) :: {degrees, degrees, z}
   def to_deg({lon, lat, z}) do
     {lon * @rad_deg, lat * @rad_deg, z}
   end
@@ -105,6 +123,7 @@ defmodule Proj do
   Turns a `{longitude_degrees, latitude_degrees, z}` tuple into
   `{longitude_radians, latitude_radians, z}`.
   """
+  @spec to_rad({degrees, degrees, z}) :: {radians, radians, z}
   def to_rad({lon, lat, z}) do
     {lon * @deg_rad, lat * @deg_rad, z}
   end
@@ -121,6 +140,7 @@ defmodule Proj do
       Proj.from_known_def("epsg", "4326") # WGS84
       Proj.from_known_def("world", "bng") # British National Grid
   """
+  @spec from_known_def(String.t, String.t) :: {:ok, t} | {:error, term}
   def from_known_def(file, name) do
     from_def("+init=#{file}:#{name}")
   end
@@ -135,6 +155,7 @@ defmodule Proj do
       Proj.from_epsg(4326) # WGS84
       Proj.from_epsg(27700) # British National Grid
   """
+  @spec from_epsg(epsg) :: {:ok, t} | {:error, term}
   def from_epsg(name) do
     from_known_def("epsg", name)
   end
@@ -152,6 +173,7 @@ defmodule Proj do
       iex> Proj.to_lat_lng!({529155, 179699}, bng)
       {51.50147938477216, -0.1406319210455952}
   """
+  @spec to_lat_lng!({easting, northing}, t) :: {degrees, degrees} | no_return
   def to_lat_lng!({x, y}, proj) do
     case transform({x, y, 0}, proj, wgs84) do
       {:ok, coords} ->
@@ -175,6 +197,7 @@ defmodule Proj do
       iex> Proj.from_lat_lng!({51.501479, -0.140631}, bng)
       {529155.0658918166, 179698.9583449281}
   """
+  @spec from_lat_lng!({degrees, degrees}, t) :: {x, y} | no_return
   def from_lat_lng!({lat, lng}, proj) do
     case transform(to_rad({lng, lat, 0}), wgs84, proj) do
       {:ok, {x, y, _z}} ->
